@@ -1,0 +1,101 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+     #msg{
+        display:flex;
+        flex-direction: column;
+     }
+    #messages {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      height: 300px;
+      overflow: scroll;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    form {
+      margin-top: 10px;
+      display: flex;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 5px;
+      border: none;
+      border-bottom: 1px solid #ccc;
+    }
+
+    button {
+      padding: 5px;
+      border: none;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  
+<div id="msg">
+
+    <ul id="messages"></ul>
+
+</div>
+  <form id="message-form">
+    <input type="text" id="message-input" placeholder="Message">
+    <button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let name=prompt("Enter your name");
+    socket.on("load messages", (messages) => {
+      messages.forEach((message) => {
+        displayMessage(message);
+      });
+    });
+
+    socket.on("new message", (message) => {
+      displayMessage(message);
+    });
+
+    const messageForm = document.getElementById("message-form");
+
+    messageForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const user = name;
+      //document.getElementById("user").value;
+      const message = document.getElementById("message-input").value;
+
+      socket.emit("new message", { user, message });
+
+      document.getElementById("user").value = "";
+      document.getElementById("message-input").value = "";
+    });
+
+    function displayMessage(message) {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${message.user}</strong>: ${message.message}`;
+      document.getElementById("messages").appendChild(li);
+    }
+  </script>
+</body>
+</html>
